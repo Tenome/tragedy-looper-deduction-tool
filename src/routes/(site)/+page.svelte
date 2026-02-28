@@ -1,6 +1,5 @@
 <script lang="ts">
   import { base } from '$app/paths';
-  import '@picocss/pico/css/pico.css';
   import { onMount } from 'svelte';
   import { getMissingForLanguage, translationExists } from '../../translations';
   import Card from './cards/card.svelte';

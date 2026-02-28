@@ -1,0 +1,10 @@
+{
+    "$schema": "./translations.schema.json",
+    "translations": {
+        "de": {
+            "+/-1 :paranoia: on character in same location.": "",
+            "+1 :goodwill: on character in same location.": "",
+            "+1 :intrigue: on this Location or any character in this Location.": "",
+        }
+    }
+}

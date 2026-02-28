@@ -156,7 +156,7 @@
                     "timing": [
                         "Loop End"
                     ],
-                    "prerequisite": "2 :intrigue: on the :Witch:’s starting location."
+                    "prerequisite": "2 :intrigue: on the :witch:’s starting location."
                 }
             ]
         },
