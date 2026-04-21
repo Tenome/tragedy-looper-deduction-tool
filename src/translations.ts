@@ -7,11 +7,11 @@ import { translations as data } from './data-translations';
 import { browser } from '$app/environment';
 import { getLocalisatio } from './storage';
 import { ui_strings } from './data-ui-strings';
-import { writable } from 'svelte/store';
-import { characters, incidents, keywords, plots, roles, scripts, tragedys } from './data';
+import { charactersLookup,  incidentsLookup, isCharacterId,  isPlotId,   plotsLookup, isKeywordId, keywordsLookup, isTagId, tagsLookup, rolesLookup, tragedysLookup } from './data';
 import MarkdownIt, { type Options } from 'markdown-it';
-import type { Renderer, Token } from 'markdown-it/index.js';
-import type { Script } from './scripts.g';
+import { isIncidentName } from './model/incidents';
+import { isRoleName, singleRolenames } from './model/roles';
+import { isTragedySetName } from './model/tragedySets';
 
 
 
@@ -107,6 +107,17 @@ export function translationExists(lang: string, key: string): boolean {
     }
     if (translation[lang] && translation[lang][keyTrimed] && translation[lang][keyTrimed].length > 0) {
         return true;
+    }
+
+    if (/^:[a-zA-Z0-9_]+:$/.test(keyTrimed)) {
+        // identifier are translated if the key is translated.
+        const identifier = keyTrimed.match(/:([a-zA-Z0-9_]+):/)![1];
+        const translation = isIdentifier(identifier, lang);
+        if (translation.isIdentifier && translation.translated !== false) {
+            return true;
+        }
+
+        return false;
     }
 
     const localTranslation =
@@ -216,4 +227,50 @@ export function getMissingForLanguage(lang: string) {
 
 export function getAllKeys(): string[] {
     return allStrings.filter(x => x.length > 0);
+}
+
+
+export function isIdentifier(emojiName: string, lang: string): { isIdentifier: true, type: 'character' | 'incident' | 'role' | 'plot' | 'tragedy' | 'keyword' | 'tag', translated: string | false } | { isIdentifier: false } {
+    if (isCharacterId(emojiName)) {
+        const character = charactersLookup[emojiName];
+        const translated = translation[lang]?.[character.name];
+        return { isIdentifier: true, type: 'character', translated: translated ?? false };
+    } else if (isIncidentName(emojiName)) {
+        const incident = incidentsLookup[emojiName];
+        const translated = translation[lang]?.[incident.name];
+        return { isIdentifier: true, type: 'incident', translated: translated ?? false };
+    } else if (isRoleName(emojiName)) {
+        const roleNames = singleRolenames(emojiName);
+        const translations = roleNames.map(roleName => {
+            const role = rolesLookup[roleName];
+            const translated = translation[lang]?.[role.name];
+            return (translated ?? false) as string | false;
+
+        });
+        if (translations.every(t => t !== false)) {
+            return { isIdentifier: true, type: 'role', translated: translations.join('|') };
+        } else {
+            return { isIdentifier: true, type: 'role', translated: false };
+        }
+
+    } else if (isPlotId(emojiName)) {
+        const plot = plotsLookup[emojiName];
+        const translated = translation[lang]?.[plot.name];
+        return { isIdentifier: true, type: 'plot', translated: translated ?? false };
+    } else if (isTragedySetName(emojiName)) {
+        const tragedy = tragedysLookup[emojiName];
+        const translated = translation[lang]?.[tragedy.name];
+        return { isIdentifier: true, type: 'tragedy', translated: translated ?? false };
+    } else if (isKeywordId(emojiName)) {
+        const keyword = keywordsLookup[emojiName];
+        const translated = translation[lang]?.[keyword.name];
+        return { isIdentifier: true, type: 'keyword', translated: translated ?? false };
+    } else if (isTagId(emojiName)) {
+        const tag = tagsLookup[emojiName];
+        const translated = translation[lang]?.[tag.name];
+        return { isIdentifier: true, type: 'tag', translated: translated ?? false };
+    } else {
+        return { isIdentifier: false };
+    }
+
 }

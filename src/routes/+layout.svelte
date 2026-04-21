@@ -43,6 +43,8 @@
   import { addTranslation } from '../storage';
   import { get } from 'svelte/store';
   import { browser } from '$app/environment';
+    import '@picocss/pico/css/pico.css';
+
     import type { imageSets } from '../view/translation.svelte';
 
   const contextKey = 'characterImages';
